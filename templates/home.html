@@ -12,5 +12,10 @@
   <h1>students first name</h1>
     {% for user in users %}
       <p>{{user.fname}}</p>
+      <form method="POST" action="./update">
+        <input type="hidden" value="{{user.fname}}" name="oldfname">
+        <input type="text" value="{{user.fname}}" name="newfname">
+        <input type="submit" value="Update">
+      </form>
     {% endfor %}
 </html>
