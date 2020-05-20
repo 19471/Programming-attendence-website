@@ -1,1 +1,16 @@
-<h1>Addtendance project</h1>
+<h1>Attendance project</h1>
+
+<html>
+  <body>
+    <h1>First Name</h1>
+    <form method="POST" action="/">
+      <input type="text" name="first name">
+      <input type="submit" value="Add">
+    </form>
+  </body>
+
+  <h1>Books</h1>
+    {% for user in users %}
+      <p>{{user.fname}}</p>
+    {% endfor %}
+</html>
