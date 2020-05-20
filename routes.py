@@ -4,6 +4,7 @@
 import os
 from flask import Flask, render_template
 from flask import request
+from flask import redirect
 import sqlite3
 from flask_sqlalchemy import SQLAlchemy
 
@@ -40,7 +41,14 @@ def home():
     users = User.query.all()
     return render_template('home.html', users=users)
 
-
+@app.route("/update", methods=["POST"])
+def update():
+    newfname = request.form.get("newfname")
+    oldfname = request.form.get("oldfname")
+    user = User.query.filter_by(fname=oldfname).first()
+    user.fname = newfname
+    db.session.commit()
+    return redirect('/')
 
 if (__name__) == '__main__':
     app.run(debug=True)
