@@ -22,8 +22,8 @@ db = SQLAlchemy(app)
 # create user table
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    fname = db.Column(db.String(20))
-    lname = db.Column(db.String(20))
+    fname = db.Column(db.String(20), nullable=False)
+    lname = db.Column(db.String(20), nullable=False)
     student_id = db.Column(db.Integer)
     auth = db.Column(db.String(20))
 
@@ -35,12 +35,14 @@ def __repr__(self):
 #route for home page
 @app.route('/', methods=["GET", "POST"])
 def home():
-    user = User(fname=request.form.get("first name"))
-    db.session.add(user)
-    db.session.commit()
+    if request.method == "POST":
+        user = User(fname=request.form.get("first name"))
+        db.session.add(user)
+        db.session.commit()
     users = User.query.all()
     return render_template('home.html', users=users)
 
+# update route to update fname in user 
 @app.route("/update", methods=["POST"])
 def update():
     newfname = request.form.get("newfname")
@@ -49,6 +51,16 @@ def update():
     user.fname = newfname
     db.session.commit()
     return redirect('/')
+
+# delete route to delete fname in user
+@app.route("/delete", methods=["POST"])
+def delete():
+    fname = request.form.get("fname")
+    user = User.query.filter_by(fname=fname).first()
+    db.session.delete(user)
+    db.session.commit()
+    return redirect("/")
+
 
 if (__name__) == '__main__':
     app.run(debug=True)
