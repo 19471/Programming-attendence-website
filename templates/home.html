@@ -1,21 +1,37 @@
-<h1>Attendance project</h1>
+{%extends "layout.html"%}
+{%block content%}
+<div class="parent"> 
+    <h1>Attendance project</h1>
+    {% from "formhelpers.html" import render_field %}
+    <div class="addform">
+        <form method="POST" action="/">
+            {{ render_field(form.fname) }}
+            {{ render_field(form.lname) }}
+            <input type="submit" value="Add"> 
+        </form>
+    </div>
 
-<html>
-  <body>
-    <h1>First Name</h1>
-    <form method="POST" action="/">
-      <input type="text" name="first name">
-      <input type="submit" value="Add">
+    <h2>users</h2>
+    {%for user in users %}
+    <p>{{user.fname}}</p>
+    <form method="POST" action="./update">
+    <input type="hidden" value="{{user.fname}}" name="oldfname">
+    <input type="text" value="{{user.fname}}" name="newfname">
+    <input type="submit" value="Update">
     </form>
-  </body>
 
-  <h1>students first name</h1>
-    {% for user in users %}
-      <p>{{user.fname}}</p>
-      <form method="POST" action="./update">
-        <input type="hidden" value="{{user.fname}}" name="oldfname">
-        <input type="text" value="{{user.fname}}" name="newfname">
-        <input type="submit" value="Update">
+    <p>{{user.lname}}</p>
+    <form method="POST" action="./update">
+    <input type="hidden" value="{{user.lname}}" name="oldlname">
+    <input type="text" value="{{user.lname}}" name="newlname">
+    <input type="submit" value="Update">
+    </form>
+
+    <form method="POST" action="./delete">
+        <input type="hidden" value="{{user.fname}}" name="fname">
+        <input type="submit" value="Delete">
       </form>
-    {% endfor %}
+    {%endfor%}
+</div>
+{%endblock%}
 </html>
