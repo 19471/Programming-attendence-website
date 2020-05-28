@@ -47,13 +47,18 @@ def __repr__(self):
 #route for home page
 @app.route('/', methods=["GET", "POST"])
 def home():
+   
+    return render_template('home.html')
+
+@app.route('/view_user', methods=["GET", "POST"])
+def view_user():
     form = new_user()
     if request.form:
         user = User(fname=form.fname.data, lname=form.lname.data, student_id=form.student_id.data, auth=form.auth.data)
         db.session.add(user)
         db.session.commit()
     users = User.query.all()
-    return render_template('home.html', users=users, form=form)
+    return render_template('view_user.html', users=users, form=form)
 
 # update route to update fname in user 
 @app.route("/update", methods=["POST"])
@@ -76,7 +81,7 @@ def update():
     if newauth != None:
         user.auth = newauth
     db.session.commit()
-    return redirect('/')
+    return redirect('/view_user')
 
 # delete route to delete fname in user
 @app.route("/delete", methods=["POST"])
@@ -85,7 +90,7 @@ def delete():
     user = User.query.filter_by(fname=fname).first()
     db.session.delete(user)
     db.session.commit()
-    return redirect("/")
+    return redirect("/view_user")
 
 
 if (__name__) == '__main__':
