@@ -33,7 +33,7 @@ class new_user(FlaskForm):
 # create user table
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    fname = db.Column(db.String(20), nullable=False)
+    fname = db.Column(db.String(20), nullable=True)
     lname = db.Column(db.String(20), nullable=True)
     student_id = db.Column(db.Integer)
     auth = db.Column(db.String(20))
@@ -59,8 +59,15 @@ def home():
 def update():
     newfname = request.form.get("newfname")
     oldfname = request.form.get("oldfname")
-    user = User.query.filter_by(fname=oldfname).first()
-    user.fname = newfname
+    newlname = request.form.get("newlname")
+    oldlname = request.form.get("oldlname")
+    print(oldlname)
+    user = User.query.filter_by(fname=oldfname, lname=oldlname).first()
+    print(user)
+    if newfname != None:
+        user.fname = newfname
+    if newlname != None:
+        user.lname = newlname
     db.session.commit()
     return redirect('/')
 
