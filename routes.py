@@ -28,7 +28,8 @@ db = SQLAlchemy(app)
 class new_user(FlaskForm):
     fname = StringField("first name",[validators.length(min=1, max=40), validators.input_required()])
     lname = StringField("last name ",[validators.length(min=1, max=40), validators.input_required()])
-
+    student_id = StringField("student id",[validators.length(min=4, max=10), validators.input_required()])
+    auth = StringField("authorisation",[validators.length(min=4, max=20), validators.input_required()])
 
 # create user table
 class User(db.Model):
@@ -48,7 +49,7 @@ def __repr__(self):
 def home():
     form = new_user()
     if request.form:
-        user = User(fname=form.fname.data, lname=form.lname.data)
+        user = User(fname=form.fname.data, lname=form.lname.data, student_id=form.student_id.data, auth=form.auth.data)
         db.session.add(user)
         db.session.commit()
     users = User.query.all()
@@ -61,13 +62,19 @@ def update():
     oldfname = request.form.get("oldfname")
     newlname = request.form.get("newlname")
     oldlname = request.form.get("oldlname")
-    print(oldlname)
+    newstudent_id = request.form.get("newstudent_id")
+    oldstudent_id = request.form.get("oldstudent_id")
+    newauth = request.form.get("newauth")
+    oldauth = request.form.get("oldauth")
     user = User.query.filter_by(fname=oldfname, lname=oldlname).first()
-    print(user)
     if newfname != None:
         user.fname = newfname
     if newlname != None:
         user.lname = newlname
+    if newstudent_id != None:
+        user.student_id = newstudent_id
+    if newauth != None:
+        user.auth = newauth
     db.session.commit()
     return redirect('/')
 
