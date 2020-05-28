@@ -17,16 +17,13 @@
     <form method="POST" action="./update">
     <input type="hidden" value="{{user.fname}}" name="oldfname">
     <input type="text" value="{{user.fname}}" name="newfname">
-    <input type="submit" value="Update">
-    </form>
-
-    <p>{{user.lname}}</p>
-    <form method="POST" action="./update">
+    <p>{{user.lname}} </p>
     <input type="hidden" value="{{user.lname}}" name="oldlname">
     <input type="text" value="{{user.lname}}" name="newlname">
     <input type="submit" value="Update">
     </form>
 
+ 
     <form method="POST" action="./delete">
         <input type="hidden" value="{{user.fname}}" name="fname">
         <input type="submit" value="Delete">
