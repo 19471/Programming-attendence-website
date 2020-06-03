@@ -1,0 +1,10 @@
+{%extends "layout.html"%}
+{%block content%}
+<!-- login form  -->
+<div class="LoginForm">
+    <form method="POST" action="/">
+        {{ render_field(form.student_id) }}
+        <input type="submit" value="Add"> 
+    </form>
+
+{%end block%}
