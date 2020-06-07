@@ -1,8 +1,9 @@
 # routes.py for automated attendance 
+# this file contains all of the routes for the attendace project 
 
 # import ilbrarys
 import os
-from flask import Flask, render_template
+from flask import Flask, render_template, url_for
 from flask import request
 from flask import redirect
 import sqlite3
@@ -11,6 +12,9 @@ from flask_wtf import FlaskForm
 from wtforms import StringField
 from wtforms import Form, SelectField, SubmitField, TextAreaField, TextField, validators, ValidationError
 from wtforms.validators import DataRequired, Length
+# flask login 
+from flask_login import LoginManager
+from flask_login import UserMixin
 
 #import tables from modules.py
 # from modules.py import * 
@@ -19,20 +23,22 @@ from wtforms.validators import DataRequired, Length
 project_dir = os.path.dirname(os.path.abspath(__file__))
 database_file = database_file = "sqlite:///{}".format(os.path.join(project_dir, "attendance_project.db"))
 
+
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = database_file
 app.config["SECRET_KEY"] = "0"
 db = SQLAlchemy(app)
+login = LoginManager(app)
 
-# add flask forms 
+# create form for flask (user view page )
 class new_user(FlaskForm):
     fname = StringField("first name",[validators.length(min=1, max=40), validators.input_required()])
     lname = StringField("last name ",[validators.length(min=1, max=40), validators.input_required()])
     student_id = StringField("student id",[validators.length(min=4, max=10), validators.input_required()])
     auth = StringField("authorisation",[validators.length(min=4, max=20), validators.input_required()])
 
-# create user table
-class User(db.Model):
+# create user table in database 
+class User(UserMixin ,db.Model):
     id = db.Column(db.Integer, primary_key=True)
     fname = db.Column(db.String(20), nullable=True)
     lname = db.Column(db.String(20), nullable=True)
@@ -50,6 +56,20 @@ def home():
    
     return render_template('home.html')
 
+
+# route for login page  
+@app.route('/login', methods=["POST", "GET"])
+def login():
+    error = None 
+    if request.method == "POST":
+        if request.form['username'] != 'admin' or request.form['password'] != 'admin':
+            error = 'incorrect credentials ' # error message change later 
+        else: 
+            return redirect(url_for('home'))
+    return render_template("login.html", error=error)
+
+
+# route to add and view different users 
 @app.route('/view_user', methods=["GET", "POST"])
 def view_user():
     form = new_user()
