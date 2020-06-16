@@ -3,7 +3,7 @@
 
 # import ilbrarys
 import os
-from flask import Flask, render_template, url_for
+from flask import Flask, render_template, url_for, session, flash
 from flask import request
 from flask import redirect
 import sqlite3
@@ -15,6 +15,7 @@ from wtforms.validators import DataRequired, Length
 # flask login 
 from flask_login import LoginManager
 from flask_login import UserMixin
+from functools import wraps
 
 #import tables from modules.py
 # from modules.py import * 
@@ -50,11 +51,29 @@ db.create_all()
 def __repr__(self):
         return "<first name: {}>".format(self.fname)
 
+# login required decorator 
+def login_required(f):
+    @wraps(f)
+    def wrap(*args, **kwargs):
+        if 'logged_in' in session:
+            return f(*args, **kwargs)
+        else: 
+            flash('you need to login first')
+            return redirect(url_for('login'))
+    return wrap
+
 #route for home page
 @app.route('/', methods=["GET", "POST"])
+@login_required
 def home():
    
     return render_template('home.html')
+
+# create route for welcome page 
+
+@app.route('/welcome') 
+def welcome():
+    return render_template("welcome.html")
 
 
 # route for login page  
@@ -64,9 +83,20 @@ def login():
     if request.method == "POST":
         if request.form['username'] != 'admin' or request.form['password'] != 'admin':
             error = 'incorrect credentials ' # error message change later 
-        else: 
+        else:  
+            # session 
+            session['logged_in'] = True 
+            flash("you're logged in ")
             return redirect(url_for('home'))
     return render_template("login.html", error=error)
+
+# create logout page 
+@app.route('/logout')
+@login_required
+def logout():
+    session.pop('logged_in', None)
+    flash("you're now logged out")
+    return redirect(url_for('welcome'))
 
 
 # route to add and view different users 
@@ -112,6 +142,9 @@ def delete():
     db.session.commit()
     return redirect("/view_user")
 
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template("404.html"), 404
 
 if (__name__) == '__main__':
     app.run(debug=True)
