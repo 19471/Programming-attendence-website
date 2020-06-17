@@ -2,8 +2,6 @@
 {%block content%}
 <head>
     <title>login page </title>
-    <meta name="viewport" content="width=device-width initial-scale=1.0">
-    <link rel="stylesheet" href="static/css/bootstrap.min.css" rel="stylesheet" media="screen">
 </head>
 <body>
     <div class="container">
@@ -15,13 +13,6 @@
             <input class="btn btn-default" type="submit" value="Login">
 
         </form>
-        {% if error %}
-        <p class="error"><strong>Error: </strong>{{error}}
-        {% endif %}
-        <br>
-        {% for message in get_flashed_messages() %}
-        {{ message }}
-        {% endfor %}
     </div>
 </body>
 
