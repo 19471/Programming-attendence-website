@@ -1,8 +1,8 @@
 {%extends "layout.html"%}
-{%block content%}
-<head>
-    <title>home page </title>
-</head>
+{% block title %}home page {% endblock %}
+
+
+{% block content %}
 <body>
     <div class="container">
         <h1>home</h1>
@@ -10,7 +10,7 @@
         <a>Click <a href="/logout">here </a> to logout</a>
         <br>
     </div>
+
 </body>
 
-
-{%endblock%}
+{% endblock %}
