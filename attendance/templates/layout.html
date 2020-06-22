@@ -20,12 +20,14 @@
           <p class="error"><strong>Error: </strong>{{error}}</p>
         {% endif %}
         <br>
+        <div class="messagecont">
         <!-- messages -->
         {% for message in get_flashed_messages() %}
           {{ message }}
         {% endfor %}
         <!-- footer -->
         {%include "footer.html"%}
+      </div>
     </div>
 </body>
 

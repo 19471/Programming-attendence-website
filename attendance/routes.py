@@ -1,37 +1,35 @@
-# routes.py for automated attendance 
-# this file contains all of the routes for the attendace project 
-
-# import ilbrarys
-import os
-from flask import Flask, render_template, url_for, session, flash
+'''
+from flask import render_template, url_for, session, flash
+from attendance import app
 from flask import request
 from flask import redirect
-import sqlite3
-from flask_sqlalchemy import SQLAlchemy
+from attendance.flask_wtf import FlaskForm
+from attendance.wtforms import StringField
+from attendance.wtforms import Form, SelectField, SubmitField, TextAreaField, TextField, validators, ValidationError
+from attendance.wtforms.validators import DataRequired, Length
+# flask login 
+from attendance.flask_login import LoginManager
+from attendance.flask_login import UserMixin
+from attendance.functools import wraps
+'''
+from flask import render_template, url_for, session, flash
+from attendance import app
+from flask import request
+from flask import redirect
 from flask_wtf import FlaskForm
 from wtforms import StringField
 from wtforms import Form, SelectField, SubmitField, TextAreaField, TextField, validators, ValidationError
 from wtforms.validators import DataRequired, Length
-
 # flask login 
 from flask_login import LoginManager
 from flask_login import UserMixin
 from functools import wraps
 
-#import tables from modules.py
-# from modules.py import * 
+# database 
+from attendance.modules import *
 
-# define database 
-project_dir = os.path.dirname(os.path.abspath(__file__))
-database_file = database_file = "sqlite:///{}".format(os.path.join(project_dir, "attendance_project.db"))
-
-
-app = Flask(__name__)
-app.config["SQLALCHEMY_DATABASE_URI"] = database_file
-app.config["SECRET_KEY"] = "0"
-db = SQLAlchemy(app)
-login = LoginManager(app)
-
+from attendance.forms import *
+'''
 # create form for flask (user view page )
 class new_user(FlaskForm):
     fname = StringField("first name",[validators.length(min=1, max=40), validators.input_required()])
@@ -49,9 +47,10 @@ class User(UserMixin ,db.Model):
 
 db.create_all()
 
+
 def __repr__(self):
         return "<first name: {}>".format(self.fname)
-
+'''
 # login required decorator 
 def login_required(f):
     @wraps(f)
@@ -71,7 +70,6 @@ def home():
     return render_template('home.html')
 
 # create route for welcome page 
-
 @app.route('/welcome') 
 def welcome():
     return render_template("welcome.html")
@@ -146,6 +144,3 @@ def delete():
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template("404.html"), 404
-
-if (__name__) == '__main__':
-    app.run(debug=True)

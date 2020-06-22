@@ -1,0 +1,22 @@
+/* heading 2 */
+h2{
+  color: black;
+}
+
+/* form for user view page */
+form {
+  color:black;
+}
+/* div that contains all error messages */
+.messagecont{
+  color: red;
+  width: 50%;
+  margin: auto;
+  
+}
+
+.container{
+  width: 50%;
+  margin: auto;
+  padding: 10px;
+}
