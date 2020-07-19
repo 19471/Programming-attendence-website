@@ -5,14 +5,17 @@
   </button>
   <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
     <div class="navbar-nav">
-      <a class="nav-item nav-link active" href="/">Home <span class="sr-only">(current)</span></a>
-      <a class="nav-item nav-link" href="/login">login</a>
-      <a class="nav-item nav-link" href="/view_user">view users</a>
-      <a class="nav-item nav-link" href="/logout" tabindex="-1" aria-disabled="true">logout</a>
+      <a class="nav-item nav-link active" href="{{ url_for('home') }}">Home <span class="sr-only">(current)</span></a>
+      <a class="nav-item nav-link" href="{{ url_for('login') }}">login</a>
+      <a class="nav-item nav-link" href="{{ url_for('register') }}">register</a>
+      <a class="nav-item nav-link" href="{{ url_for('view_user') }}">view users</a>
+      <a class="nav-item nav-link" href="{{ url_for('logout') }}" tabindex="-1" aria-disabled="true">logout</a>
     </div>
   </div>
 </nav>
-<!--
+
+
+<!-- nav w dropdown menu
 <span class="a">
     <div class="dropdown">
     <button class="dropbtn">Menu</button>

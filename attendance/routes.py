@@ -1,17 +1,4 @@
-'''
-from flask import render_template, url_for, session, flash
-from attendance import app
-from flask import request
-from flask import redirect
-from attendance.flask_wtf import FlaskForm
-from attendance.wtforms import StringField
-from attendance.wtforms import Form, SelectField, SubmitField, TextAreaField, TextField, validators, ValidationError
-from attendance.wtforms.validators import DataRequired, Length
-# flask login 
-from attendance.flask_login import LoginManager
-from attendance.flask_login import UserMixin
-from attendance.functools import wraps
-'''
+from datetime import datetime
 from flask import render_template, url_for, session, flash
 from attendance import app
 from flask import request
@@ -26,31 +13,10 @@ from flask_login import UserMixin
 from functools import wraps
 
 # database 
-from attendance.modules import *
+from attendance.models import *
 
 from attendance.forms import *
-'''
-# create form for flask (user view page )
-class new_user(FlaskForm):
-    fname = StringField("first name",[validators.length(min=1, max=40), validators.input_required()])
-    lname = StringField("last name ",[validators.length(min=1, max=40), validators.input_required()])
-    student_id = StringField("student id",[validators.length(min=4, max=10), validators.input_required()])
-    auth = StringField("authorisation",[validators.length(min=4, max=20), validators.input_required()])
 
-# create user table in database 
-class User(UserMixin ,db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    fname = db.Column(db.String(20), nullable=True)
-    lname = db.Column(db.String(20), nullable=True)
-    student_id = db.Column(db.Integer)
-    auth = db.Column(db.String(20))
-
-db.create_all()
-
-
-def __repr__(self):
-        return "<first name: {}>".format(self.fname)
-'''
 # login required decorator 
 def login_required(f):
     @wraps(f)
@@ -64,7 +30,7 @@ def login_required(f):
 
 #route for home page
 @app.route('/', methods=["GET", "POST"])
-@login_required
+# @login_required
 def home():
    
     return render_template('home.html')
@@ -74,7 +40,30 @@ def home():
 def welcome():
     return render_template("welcome.html")
 
+# registration route
+@app.route("/register", methods=["POST", "GET"])
+def register():
+    form = RegistrationForm() 
+    if request.method == "POST" and form.validate_on_submit():
+        flash(f'account created for {form.student_id.data}!', 'sucess')
+        #flash('account created for {}'.format(form.student_id.data))
+        return redirect(url_for('welcome')) # redirect to home one user session is done 
+    return render_template("register.html", title="Register", form=form)
 
+# second variant of login route 
+@app.route('/login', methods=["POST", "GET"])
+def login():
+    form = LoginForm()
+    if request.method == "POST" and form.validate_on_submit():
+        if form.email.data == 'admin@blog.com' and form.password.data == 'admin':
+            flash('youre logged in ', 'success')
+            return redirect(url_for('home')) # redirects to home page after login 
+        else:
+            flash('login unsuccessful', 'danger')
+    return render_template("login.html", title='Login', form=form)
+
+
+'''
 # route for login page  
 @app.route('/login', methods=["POST", "GET"])
 def login():
@@ -88,6 +77,7 @@ def login():
             flash("you're logged in ")
             return redirect(url_for('home'))
     return render_template("login.html", error=error)
+'''
 
 # create logout page 
 @app.route('/logout')

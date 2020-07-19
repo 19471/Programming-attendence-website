@@ -2,18 +2,56 @@
 {% block title %}login page {% endblock %}
 {%block content%}
 
-<body>
-    <div class="container">
-        <h1>login</h1>
-        <br>
-        <form action="" method="post">
-            <input type="text" placeholder="Username" name="username" value="{{request.form.username}}">
-            <input type="password" placeholder="Password" name="password" value="{{request.form.password}}">
-            <input class="btn btn-default" type="submit" value="Login">
+<div class="container">
+        <form method="POST" action="">
+            {{form.csrf_token}}
 
+            <fieldset class="form-group">
+                <legend class="border-bottom mb-4">login  </legend>
+                <div class="form-group"> <!-- email -->
+                    {{ form.email.label(class="form-control-label") }}
+                    {% if form.email.errors %}
+                        {{ form.email(class="form-control form-control-lg is invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.email.errors %}
+                                <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form.email(class="form-control form-control-lg") }}
+                    {% endif %}
+                </div>
+                <div class="form-group"> <!-- password -->
+                    {{ form.password.label(class="form-control-label") }}
+                    {% if form.password.errors %}
+                        {{ form.password(class="form-control form-control-lg is invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.password.errors %}
+                                <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form.password(class="form-control form-control-lg") }}
+                    {% endif %}
+                </div>
+                <div class="form-check">
+                    {{ form.remember(class="form-check-input") }}
+                    {{ form.remember.label(class="form-check-label") }}
+                </div>
+            </fieldset>
+            <div class="form-group">
+                {{ form.submit(class="btn btn-outline-info") }}
+            </div>
+            <small class="text-muted ml-2">
+                <a href="#">Forgot password?</a>    
+            </small>
         </form>
     </div>
-</body>
-
+    <div class="border-top pt-3">
+            <small class="text-muted">
+                 dont have an account? <a class="ml-2" href="{{url_for('register')}}">Sign up</a>
+            </small>
+        </div>
+  
 {%endblock%}
 
