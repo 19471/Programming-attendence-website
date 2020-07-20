@@ -1,94 +1,79 @@
 from datetime import datetime
-from flask import render_template, url_for, session, flash
-from attendance import app
-from flask import request
-from flask import redirect
+from flask import render_template, url_for, session, flash, request, redirect
+from attendance import app, db, bcrypt
 from flask_wtf import FlaskForm
 from wtforms import StringField
 from wtforms import Form, SelectField, SubmitField, TextAreaField, TextField, validators, ValidationError
 from wtforms.validators import DataRequired, Length
-# flask login 
+# flask login
 from flask_login import LoginManager
 from flask_login import UserMixin
+from flask_login import login_user, current_user, logout_user, login_required
 from functools import wraps
 
-# database 
+# database
 from attendance.models import *
 
 from attendance.forms import *
-
-# login required decorator 
-def login_required(f):
-    @wraps(f)
-    def wrap(*args, **kwargs):
-        if 'logged_in' in session:
-            return f(*args, **kwargs)
-        else: 
-            flash('you need to login first')
-            return redirect(url_for('login'))
-    return wrap
 
 #route for home page
 @app.route('/', methods=["GET", "POST"])
 # @login_required
 def home():
-   
+
     return render_template('home.html')
 
-# create route for welcome page 
-@app.route('/welcome') 
+# create route for welcome page
+@app.route('/welcome')
 def welcome():
     return render_template("welcome.html")
 
 # registration route
 @app.route("/register", methods=["POST", "GET"])
 def register():
-    form = RegistrationForm() 
+    if current_user.is_authenticated: # if the user is already logged in
+        return redirect(url_for('home'))
+    form = RegistrationForm()
     if request.method == "POST" and form.validate_on_submit():
-        flash(f'account created for {form.student_id.data}!', 'sucess')
-        #flash('account created for {}'.format(form.student_id.data))
-        return redirect(url_for('welcome')) # redirect to home one user session is done 
+        hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
+        user = User(fname=form.fname.data, lname=form.student_id.data, student_id=form.student_id.data, email=form.email.data, password=hashed_password)
+        db.session.add(user)
+        db.session.commit()
+        flash('account created ', 'success')
+        return redirect(url_for('login')) # redirect to home one user session is done
     return render_template("register.html", title="Register", form=form)
 
-# second variant of login route 
+# second variant of login route
 @app.route('/login', methods=["POST", "GET"])
 def login():
+    if current_user.is_authenticated:
+        return redirect(url_for('home'))
     form = LoginForm()
     if request.method == "POST" and form.validate_on_submit():
-        if form.email.data == 'admin@blog.com' and form.password.data == 'admin':
-            flash('youre logged in ', 'success')
-            return redirect(url_for('home')) # redirects to home page after login 
+        user = User.query.filter_by(email=form.email.data).first()
+        if user and bcrypt.check_password_hash(user.password, form.password.data):
+            login_user(user, remember=form.remember.data)
+            next_page = request.args.get('next')
+            return redirect(next_page) if next_page else redirect(url_for('home'))
         else:
-            flash('login unsuccessful', 'danger')
+            flash('login unsuccessful, please check email and password', 'danger')
     return render_template("login.html", title='Login', form=form)
 
 
-'''
-# route for login page  
-@app.route('/login', methods=["POST", "GET"])
-def login():
-    error = None 
-    if request.method == "POST":
-        if request.form['username'] != 'admin' or request.form['password'] != 'admin':
-            error = 'incorrect credentials ' # error message change later 
-        else:  
-            # session 
-            session['logged_in'] = True 
-            flash("you're logged in ")
-            return redirect(url_for('home'))
-    return render_template("login.html", error=error)
-'''
-
-# create logout page 
-@app.route('/logout')
+# create logout page
+@app.route('/account')
 @login_required
+def account():
+
+    return render_template("account.html", title=account)
+
+@app.route('/logout')
+# @login_required
 def logout():
-    session.pop('logged_in', None)
-    flash("you're now logged out")
+    logout_user()
     return redirect(url_for('welcome'))
 
-
-# route to add and view different users 
+# route to add and view different users
 @app.route('/view_user', methods=["GET", "POST"])
 def view_user():
     form = new_user()
@@ -99,7 +84,7 @@ def view_user():
     users = User.query.all()
     return render_template('view_user.html', users=users, form=form)
 
-# update route to update fname in user 
+# update route to update fname in user
 @app.route("/update", methods=["POST"])
 def update():
     newfname = request.form.get("newfname")
