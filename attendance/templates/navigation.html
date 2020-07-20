@@ -6,10 +6,14 @@
   <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
     <div class="navbar-nav">
       <a class="nav-item nav-link active" href="{{ url_for('home') }}">Home <span class="sr-only">(current)</span></a>
-      <a class="nav-item nav-link" href="{{ url_for('login') }}">login</a>
-      <a class="nav-item nav-link" href="{{ url_for('register') }}">register</a>
+      {% if current_user.is_authenticated %}
+      <a class="nav-item nav-link" href="{{ url_for('account') }}">account</a>
       <a class="nav-item nav-link" href="{{ url_for('view_user') }}">view users</a>
       <a class="nav-item nav-link" href="{{ url_for('logout') }}" tabindex="-1" aria-disabled="true">logout</a>
+      {% else %}
+      <a class="nav-item nav-link" href="{{ url_for('login') }}">login</a>
+      <a class="nav-item nav-link" href="{{ url_for('register') }}">register</a>
+      {% endif %}
     </div>
   </div>
 </nav>
@@ -25,9 +29,9 @@
       <a href="/login">Login</a>
     </div>
   </div>
-  
+
   </span>
-  
+
 /* The container <div> - needed to position the dropdown content */
 .dropdown {
   position: relative;
@@ -75,4 +79,3 @@
 
 
 -->
-  
