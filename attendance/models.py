@@ -4,13 +4,18 @@ from flask_wtf import FlaskForm
 from wtforms import StringField
 from wtforms import Form, SelectField, SubmitField, TextAreaField, TextField, validators, ValidationError
 from wtforms.validators import DataRequired, Length
-# flask login 
+# flask login
 from flask_login import LoginManager
 from flask_login import UserMixin
 from functools import wraps
-from attendance import db
+from attendance import db, login_manager
 
-# create user table in database 
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
+
+
+# create user table in database
 class User(UserMixin ,db.Model):
     id = db.Column(db.Integer, primary_key=True)
     fname = db.Column(db.String(20), nullable=True)
@@ -34,5 +39,3 @@ class Post(db.Model):
 
     def __repr__(self):
         return f"Post('{self.title}', '{self.date_posted}')"
-
-
