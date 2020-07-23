@@ -1,7 +1,11 @@
+body{
+  background: #fafafa;
+  color: #333333;
 }
-/* heading 2 */
-h2{
-  color: black;
+
+/* headings */
+h1, h2, h3, h4, h5, h6{
+  color: #444444;
 }
 
 /* form for user view page */
@@ -16,17 +20,43 @@ form {
   
 }
 
+/* content holder */
 .container{
   width: 50%;
   margin: auto;
   padding: 10px;
 }
+
 small.text-muted{
   text-align: center;
   width: 50%;
   margin: auto;
   padding: 10px;
 }
+
 .invalid-feedback{
   display: block;
+}
+
+bg-steel{
+  background-color: #5f788a;
+}
+
+/* pfp on account page  */
+.account-img{
+  height: 125px;
+  width: 125px;
+  margin-right: 20px;
+  margin-bottom: 16px;
+}
+
+/* username on account page */
+.account-heading{
+  font-size: 2.5rem;
+}
+
+/* media container on account page */
+.media{
+  margin-top: 2rem; /* space from pfp and nav bar so it doesnt look too clustered  */
+
 }
