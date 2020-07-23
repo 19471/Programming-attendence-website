@@ -35,9 +35,9 @@ def register():
         return redirect(url_for('home'))
     form = RegistrationForm()
     if request.method == "POST" and form.validate_on_submit():
-        hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
-        user = User(fname=form.fname.data, lname=form.student_id.data, student_id=form.student_id.data, email=form.email.data, password=hashed_password)
-        db.session.add(user)
+        hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8') # hash the password the user enters into the website
+        user = User(fname=form.fname.data, lname=form.student_id.data, student_id=form.student_id.data, email=form.email.data, password=hashed_password) # adds the users data into the variable user
+        db.session.add(user) # adds the users data to the database 
         db.session.commit()
         flash('account created ', 'success')
         return redirect(url_for('login')) # redirect to home one user session is done
@@ -54,7 +54,7 @@ def login():
         if user and bcrypt.check_password_hash(user.password, form.password.data):
             login_user(user, remember=form.remember.data)
             next_page = request.args.get('next')
-            return redirect(next_page) if next_page else redirect(url_for('home'))
+            return redirect(next_page) if next_page else redirect(url_for('welcome'))
         else:
             flash('login unsuccessful, please check email and password', 'danger')
     return render_template("login.html", title='Login', form=form)
@@ -62,7 +62,7 @@ def login():
 
 # create logout page
 @app.route('/account')
-@login_required
+@login_required # reqquires user to be logged in to access 
 def account():
 
     return render_template("account.html", title=account)
@@ -71,10 +71,11 @@ def account():
 # @login_required
 def logout():
     logout_user()
-    return redirect(url_for('welcome'))
+    return redirect(url_for('home')) # take user back to home page 
 
 # route to add and view different users
 @app.route('/view_user', methods=["GET", "POST"])
+@login_required
 def view_user():
     form = new_user()
     if request.form:
@@ -116,6 +117,7 @@ def delete():
     db.session.commit()
     return redirect("/view_user")
 
+# page that youre redirected to when an incorrect url is put in 
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template("404.html"), 404
