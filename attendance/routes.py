@@ -1,3 +1,6 @@
+import os
+import secrets
+from PIL import Image
 from datetime import datetime
 from flask import render_template, url_for, session, flash, request, redirect
 from attendance import app, db, bcrypt
@@ -10,7 +13,6 @@ from flask_login import LoginManager
 from flask_login import UserMixin
 from flask_login import login_user, current_user, logout_user, login_required
 from functools import wraps
-
 # database
 from attendance.models import *
 
@@ -36,7 +38,7 @@ def register():
     form = RegistrationForm()
     if request.method == "POST" and form.validate_on_submit():
         hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8') # hash the password the user enters into the website
-        user = User(fname=form.fname.data, lname=form.student_id.data, student_id=form.student_id.data, email=form.email.data, password=hashed_password) # adds the users data into the variable user
+        user = User(fname=form.fname.data, lname=form.lname.data, student_id=form.student_id.data, email=form.email.data, password=hashed_password) # adds the users data into the variable user
         db.session.add(user) # adds the users data to the database 
         db.session.commit()
         flash('account created ', 'success')
@@ -46,31 +48,60 @@ def register():
 # second variant of login route
 @app.route('/login', methods=["POST", "GET"])
 def login():
-    if current_user.is_authenticated:
-        return redirect(url_for('home'))
-    form = LoginForm()
+    if current_user.is_authenticated: # if the current user is logged in 
+        return redirect(url_for('home')) # take them to home page 
+    form = LoginForm() # connect to login form
     if request.method == "POST" and form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
-        if user and bcrypt.check_password_hash(user.password, form.password.data):
-            login_user(user, remember=form.remember.data)
-            next_page = request.args.get('next')
-            return redirect(next_page) if next_page else redirect(url_for('welcome'))
+        if user and bcrypt.check_password_hash(user.password, form.password.data): # check password against users entry 
+            login_user(user, remember=form.remember.data) # if the user clicked remember me 
+            next_page = request.args.get('next') # variable that holds the page the user wanted to get to before they had to log on 
+            return redirect(next_page) if next_page else redirect(url_for('welcome')) # redirect to next page
         else:
             flash('login unsuccessful, please check email and password', 'danger')
     return render_template("login.html", title='Login', form=form)
 
 
-# create logout page
-@app.route('/account')
+# function to change pfp
+def save_picture(form_picture):
+    random_hex = secrets.token_hex(8) # gets a random 8 bit string for filename so no files clash
+    _, f_ext = os.path.splitext(form_picture.filename) # find out if file is a jpg or png ''' here s'''
+    picture_fn = random_hex + f_ext # makes the pictures filename equal to the random hex and the file extension (jpg or png)
+    picture_path = os.path.join(app.root_path, 'static/profile_pics', picture_fn) # concatonates path for profile pics with picture path 
+    
+    output_size = (125, 125) # tuple that contains file sizes h/w
+    i = Image.open(form_picture)
+    i.thumbnail(output_size) # resizes the image to i h/w 
+    i.save(picture_path) # saves image to the picture path 
+
+    return picture_fn 
+
+# account page 
+@app.route('/account', methods=["GET", "post"])
 @login_required # reqquires user to be logged in to access 
 def account():
+    form = UpdateAccouintForm()
+    if form.validate_on_submit() and request.method == "POST":
+        if form.picture.data:
+            picture_file = save_picture(form.picture.data)
+            current_user.image_file =  picture_file
+        current_user.student_id = form.student_id.data
+        current_user.email = form.email.data # add new email address
+        db.session.commit() # commit changed to database
+        flash('your account has been updated', 'success')
+        return redirect(url_for('account'))
+    else:
+    # elif request.method == 'GET':
+        form.student_id.data = current_user.student_id
+        form.email.data = current_user.email
+    image_file = url_for('static', filename='profile_pics/' + current_user.image_file)
+    return render_template("account.html", title=account, image_file=image_file, form=form)
 
-    return render_template("account.html", title=account)
-
+# route for logout function 
 @app.route('/logout')
 # @login_required
 def logout():
-    logout_user()
+    logout_user() # logout user 
     return redirect(url_for('home')) # take user back to home page 
 
 # route to add and view different users
