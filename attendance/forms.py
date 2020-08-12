@@ -1,6 +1,6 @@
 from flask import Flask
 from flask_wtf import FlaskForm
-from wtforms import Form, SelectField, SubmitField, TextAreaField, TextField, validators, ValidationError, StringField, BooleanField, PasswordField, IntegerField
+from wtforms import Form, SelectField, SubmitField, TextAreaField, TextField, validators, ValidationError, StringField, BooleanField, PasswordField, IntegerField, TextAreaField
 from flask_wtf.file import FileField, FileAllowed
 from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError
 # flask login
@@ -81,5 +81,9 @@ class UpdateAccouintForm(FlaskForm):
                 raise ValidationError('this email is already taken please choose a different one')
 
         
-    
+# create form to create posts 
+class PostForm(FlaskForm):
+    title = StringField('Title', validators=[DataRequired()])
+    content = TextAreaField('content', validators=[DataRequired()])
+    submit = SubmitField('Post')
    
