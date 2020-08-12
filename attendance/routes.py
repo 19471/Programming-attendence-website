@@ -2,7 +2,7 @@ import os
 import secrets
 from PIL import Image
 from datetime import datetime
-from flask import render_template, url_for, session, flash, request, redirect
+from flask import render_template, url_for, session, flash, request, redirect, abort
 from attendance import app, db, bcrypt
 from flask_wtf import FlaskForm
 from wtforms import StringField
@@ -22,8 +22,8 @@ from attendance.forms import *
 @app.route('/', methods=["GET", "POST"])
 # @login_required
 def home():
-
-    return render_template('home.html')
+    posts = Post.query.all()
+    return render_template('home.html', posts=posts)
 
 # create route for welcome page
 @app.route('/welcome')
@@ -88,7 +88,7 @@ def account():
         current_user.student_id = form.student_id.data
         current_user.email = form.email.data # add new email address
         db.session.commit() # commit changed to database
-        flash('your account has been updated', 'success')
+        flash('Your account has been updated', 'success')
         return redirect(url_for('account'))
     else:
     # elif request.method == 'GET':
@@ -97,12 +97,71 @@ def account():
     image_file = url_for('static', filename='profile_pics/' + current_user.image_file)
     return render_template("account.html", title=account, image_file=image_file, form=form)
 
+# route for posts 
+@app.route("/post/new", methods=["GET", "post"])
+@login_required
+def new_post():
+    form = PostForm()
+    if form.validate_on_submit() and request.method == "POST":
+        post = Post(title=form.title.data, content=form.content.data, author=current_user)
+        db.session.add(post)
+        db.session.commit()
+        flash("Your post has been created", 'success')
+        return redirect(url_for('home'))
+
+    return render_template('create_post.html', title='new_post', form=form, legend='new post')
+
+# route to each individual post
+@app.route("/post/<int:post_id>")
+def post(post_id):
+    post = Post.query.get_or_404(post_id)
+    return render_template('post.html', title=post.title, post=post)
+
+
+# route to update posts
+@app.route("/post/<int:post_id>/update", methods=["GET", "post"])
+@login_required
+def update_post(post_id):
+    post = Post.query.get_or_404(post_id)
+    if post.author != current_user:
+        abort(403)
+    form = PostForm()
+    if form.validate_on_submit():
+        post.title = form.title.data
+        post.content = form.content.data
+        db.session.commit()
+        flash("your post has been updated", 'success')
+        return redirect(url_for('post', post_id=post.id))
+    elif request.method == "GET":
+        form.title.data = post.title
+        form.content.data = post.content
+    return render_template('create_post.html', title="update post", 
+                           form=form, legend='update post')
+
+
+# route to delete posts
+# route to update posts
+@app.route("/post/<int:post_id>/delete", methods=["GET", "post"])
+@login_required
+def delete_post(post_id):
+    post = Post.query.get_or_404(post_id)
+    if post.author != current_user:
+        abort(403)
+    db.session.delete(post)
+    db.session.commit()
+    flash("your post has been deleted!")
+    return redirect(url_for('home'))
+
 # route for logout function 
 @app.route('/logout')
 # @login_required
 def logout():
     logout_user() # logout user 
     return redirect(url_for('home')) # take user back to home page 
+
+
+
+
 
 # route to add and view different users
 @app.route('/view_user', methods=["GET", "POST"])
