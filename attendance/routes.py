@@ -22,7 +22,9 @@ from attendance.forms import *
 @app.route('/', methods=["GET", "POST"])
 # @login_required
 def home():
-    posts = Post.query.all()
+    page = request.args.get('page', 1, type=int) 
+    posts = Post.query.order_by(Post.date_posted.desc()).paginate(page=page, per_page=5) # number is amount of posts per page -- orders posts by newest (date_posted.desc)
+
     return render_template('home.html', posts=posts)
 
 # create route for welcome page
@@ -84,7 +86,7 @@ def account():
     if form.validate_on_submit() and request.method == "POST":
         if form.picture.data:
             picture_file = save_picture(form.picture.data)
-            current_user.image_file =  picture_file
+            current_user.image_file =  picture_file # change the users pfp to the new picture file 
         current_user.student_id = form.student_id.data
         current_user.email = form.email.data # add new email address
         db.session.commit() # commit changed to database
@@ -96,6 +98,18 @@ def account():
         form.email.data = current_user.email
     image_file = url_for('static', filename='profile_pics/' + current_user.image_file)
     return render_template("account.html", title=account, image_file=image_file, form=form)
+
+#route that displays users (view a different user and their posts )
+@app.route('/user/<string:student_id>')
+def user_posts(student_id):
+    page = request.args.get('page', 1, type=int) 
+    user = User.query.filter_by(student_id=student_id).first_or_404() # first or 404 so if value is none then it returns a 404
+    posts = Post.query.filter_by(author=user)\
+        .order_by(Post.date_posted.desc())\
+        .paginate(page=page, per_page=5)\
+         # number of pages is amount of posts per page -- orders posts by newest (date_posted.desc)
+
+    return render_template('user_posts.html', posts=posts, user=user)
 
 # route for posts 
 @app.route("/post/new", methods=["GET", "post"])
@@ -122,17 +136,17 @@ def post(post_id):
 @app.route("/post/<int:post_id>/update", methods=["GET", "post"])
 @login_required
 def update_post(post_id):
-    post = Post.query.get_or_404(post_id)
-    if post.author != current_user:
-        abort(403)
+    post = Post.query.get_or_404(post_id) # if there is no post with that post id then return 404 error
+    if post.author != current_user: # if the user doesnt own the post
+        abort(403)  # return error --- style error later
     form = PostForm()
     if form.validate_on_submit():
-        post.title = form.title.data
-        post.content = form.content.data
+        post.title = form.title.data # have the original post title on the update page
+        post.content = form.content.data # have the original post content on the update page
         db.session.commit()
         flash("your post has been updated", 'success')
         return redirect(url_for('post', post_id=post.id))
-    elif request.method == "GET":
+    elif request.method == "GET": # if there is a get request 
         form.title.data = post.title
         form.content.data = post.content
     return render_template('create_post.html', title="update post", 
@@ -140,7 +154,6 @@ def update_post(post_id):
 
 
 # route to delete posts
-# route to update posts
 @app.route("/post/<int:post_id>/delete", methods=["GET", "post"])
 @login_required
 def delete_post(post_id):
@@ -158,7 +171,6 @@ def delete_post(post_id):
 def logout():
     logout_user() # logout user 
     return redirect(url_for('home')) # take user back to home page 
-
 
 
 
