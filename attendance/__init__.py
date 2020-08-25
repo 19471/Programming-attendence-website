@@ -11,8 +11,11 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_login import UserMixin
 from functools import wraps
+# flask mail
+from flask_mail import Mail
 # crypt
 from flask_bcrypt import Bcrypt
+
 # define database
 project_dir = os.path.dirname(os.path.abspath(__file__))
 database_file = database_file = "sqlite:///{}".format(os.path.join(project_dir, "attendance_project.db"))
@@ -26,6 +29,13 @@ bcrypt = Bcrypt(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 login_manager.login_message_category = 'info'
+
+# mail constants 
+app.config['Mail_Server'] = 'smtp.googlemail.com'
+app.config['Mail_PORT'] = 587
+app.config['Mail_USE_TLS'] = True
+app.config['Mail_USERNAME'] = '' 
+app.config['Mail_PASS'] = ''
 
 from attendance.models import *
 db.create_all()
