@@ -3,7 +3,7 @@ import secrets
 from PIL import Image
 from datetime import datetime
 from flask import render_template, url_for, session, flash, request, redirect, abort
-from attendance import app, db, bcrypt
+from attendance import app, db, bcrypt, mail
 from flask_wtf import FlaskForm
 from wtforms import StringField
 from wtforms import Form, SelectField, SubmitField, TextAreaField, TextField, validators, ValidationError
@@ -13,6 +13,8 @@ from flask_login import LoginManager
 from flask_login import UserMixin
 from flask_login import login_user, current_user, logout_user, login_required
 from functools import wraps
+# flask mail 
+from flask_mail import Message
 # database
 from attendance.models import *
 
@@ -159,7 +161,7 @@ def update_post(post_id):
 def delete_post(post_id):
     post = Post.query.get_or_404(post_id)
     if post.author != current_user:
-        abort(403)
+        abort(403) # 403 forbbidden error 
     db.session.delete(post)
     db.session.commit()
     flash("your post has been deleted!")
@@ -172,8 +174,53 @@ def logout():
     logout_user() # logout user 
     return redirect(url_for('home')) # take user back to home page 
 
+# function to send an email to the user 
+def send_reset_email(user):
+    token = user.get_reset_token()
+    msg = Message('Password reset request',
+                 sender="dtptestemail@gmail.com",
+                 recipients=[user.email]) # subect, sender, recipiants
+    msg.body = f''' to reset your password, visit the following link:
+{url_for('reset_token',token=token, _external=True)}
 
+If you did not request a password change then please ignore this email
+'''
+    mail.send(msg)
 
+# route to request a password reset
+@app.route("/reset_password", methods=["GET", "post"])
+def reset_request():
+        if current_user.is_authenticated: # if the current user is logged in 
+            return redirect(url_for('home'))
+        form = RequestResetForm()
+        if form.validate_on_submit(): # if the form validates of submit
+            user = User.query.filter_by(email=form.email.data).first()
+            send_reset_email(user)
+            flash("an email has been sent to you to reset your email")
+            return redirect(url_for('login'))
+        return render_template('reset_request.html', title='reset_password', form=form)
+
+# route to reset password
+@app.route("/reset_password/<token>", methods=["GET", "post"])
+def reset_token(token):
+    if current_user.is_authenticated: # if the current user is logged in 
+        return redirect(url_for('home')) 
+    user = User.verify_reset_token(token) 
+    if user is None: # if there is no 
+        flash('That is an invalid or expired token', 'text-warning')
+        return redirect(url_for('reset_request'))
+    form = ResetPasswordForm()
+    if request.method == "POST" and form.validate_on_submit():
+        hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8') # hash the password the user enters into the website
+        user.password = hashed_password
+        db.session.commit()
+        flash('your password has been changed', 'success')
+        return redirect(url_for('login')) # redirect to home one user session is done
+    return render_template('reset_token.html', title='reset_password', form=form)
+
+'''
+admin routes -- view_user page 
+'''
 
 # route to add and view different users
 @app.route('/view_user', methods=["GET", "POST"])
@@ -181,7 +228,7 @@ def logout():
 def view_user():
     form = new_user()
     if request.form:
-        user = User(fname=form.fname.data, lname=form.lname.data, student_id=form.student_id.data, auth=form.auth.data)
+        user = User(fname=form.fname.data, lname=form.lname.data, student_id=form.student_id.data, auth=form.auth.data) # make user euqal to input information 
         db.session.add(user)
         db.session.commit()
     users = User.query.all()

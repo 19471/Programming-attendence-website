@@ -31,11 +31,15 @@ login_manager.login_view = 'login'
 login_manager.login_message_category = 'info'
 
 # mail constants 
-app.config['Mail_Server'] = 'smtp.googlemail.com'
-app.config['Mail_PORT'] = 587
-app.config['Mail_USE_TLS'] = True
-app.config['Mail_USERNAME'] = '' 
-app.config['Mail_PASS'] = ''
+mail= Mail(app)
+
+app.config['MAIL_SERVER']='smtp.gmail.com'
+app.config['MAIL_PORT'] = 465
+app.config['MAIL_USERNAME'] = 'dtptestemail@gmail.com'
+app.config['MAIL_PASSWORD'] = 'dtptestemail'
+app.config['MAIL_USE_TLS'] = False
+app.config['MAIL_USE_SSL'] = True
+mail = Mail(app)
 
 from attendance.models import *
 db.create_all()
