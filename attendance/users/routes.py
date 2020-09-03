@@ -21,7 +21,7 @@ def register():
         user = User(fname=form.fname.data, lname=form.lname.data, student_id=form.student_id.data, email=form.email.data, password=hashed_password) # adds the users data into the variable user
         db.session.add(user) # adds the users data to the database 
         db.session.commit()
-        flash('account created ', 'success')
+        flash('account created ', 'success') 
         return redirect(url_for('users.login')) # redirect to home one user session is done
     return render_template("register.html", title="Register", form=form)
 
