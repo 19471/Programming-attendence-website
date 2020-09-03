@@ -1,16 +1,10 @@
-from flask import Flask
 from flask_wtf import FlaskForm
-from wtforms import Form, SelectField, SubmitField, TextAreaField, TextField, validators, ValidationError, StringField, BooleanField, PasswordField, IntegerField, TextAreaField
 from flask_wtf.file import FileField, FileAllowed
+from wtforms import StringField, PasswordField, SubmitField, BooleanField, validators
 from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError
-# flask login
-from flask_login import LoginManager, current_user
-from flask_login import UserMixin
-from functools import wraps
+from flask_login import current_user
 from attendance.models import User
 
-
-# create form for flask (user view page )
 # create form for flask (user view page )
 class new_user(FlaskForm):
     fname = StringField("first name",[validators.length(min=1, max=40), validators.input_required()])
@@ -80,13 +74,6 @@ class UpdateAccouintForm(FlaskForm):
             if user:
                 raise ValidationError('this email is already taken please choose a different one')
 
-        
-# create form to create posts 
-class PostForm(FlaskForm):
-    title = StringField('Title', validators=[DataRequired()])
-    content = TextAreaField('content', validators=[DataRequired()])
-    submit = SubmitField('Post')
-   
 class RequestResetForm(FlaskForm):
     email = StringField("Email",[validators.DataRequired(), validators.Email()])
     submit = SubmitField('request password reset')

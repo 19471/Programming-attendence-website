@@ -27,7 +27,7 @@ app.config["SECRET_KEY"] = "0"
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
 login_manager = LoginManager(app)
-login_manager.login_view = 'login'
+login_manager.login_view = 'users.login'
 login_manager.login_message_category = 'info'
 
 # mail constants 
@@ -44,6 +44,11 @@ mail = Mail(app)
 from attendance.models import *
 db.create_all()
 
+# import blueprint objects
+from attendance.users.routes import users
+from attendance.posts.routes import posts
+from attendance.main.routes import main
 
-
-from attendance import routes
+app.register_blueprint(users)
+app.register_blueprint(posts)
+app.register_blueprint(main)
