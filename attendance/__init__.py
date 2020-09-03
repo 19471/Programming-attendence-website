@@ -48,7 +48,9 @@ db.create_all()
 from attendance.users.routes import users
 from attendance.posts.routes import posts
 from attendance.main.routes import main
+from attendance.errors.handlers import errors
 
 app.register_blueprint(users)
 app.register_blueprint(posts)
 app.register_blueprint(main)
+app.register_blueprint(errors)
