@@ -9,7 +9,7 @@ posts = Blueprint('posts', __name__)
 
 
 # route for posts 
-@posts.route("/post/new", methods=["GET", "post"])
+@posts.route("/post/new", methods=["GET", "POST"])
 @login_required
 def new_post():
     form = PostForm()
