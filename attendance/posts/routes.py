@@ -42,8 +42,8 @@ def update_post(post_id):
         post.title = form.title.data # have the original post title on the update page
         post.content = form.content.data # have the original post content on the update page
         db.session.commit()
-        flash("your post has been updated", 'success')
-        return redirect(url_for('post.post', post_id=post.id))
+        flash("Your post has been updated", 'success')
+        return redirect(url_for('posts.post', post_id=post.id))
     elif request.method == "GET": # if there is a get request 
         form.title.data = post.title
         form.content.data = post.content
@@ -60,5 +60,5 @@ def delete_post(post_id):
         abort(403) # 403 forbbidden error 
     db.session.delete(post)
     db.session.commit()
-    flash("your post has been deleted!")
+    flash("Your post has been deleted!", 'success')
     return redirect(url_for('main.home'))
