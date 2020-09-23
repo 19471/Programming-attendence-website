@@ -32,7 +32,7 @@ def login():
         return redirect(url_for('main.home')) # take them to home page 
     form = LoginForm() # connect to login form
     if request.method == "POST" and form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data).first()
+        user = User.query.filter_by(email=form.email.data.first())
         if user and bcrypt.check_password_hash(user.password, form.password.data): # check password against users entry 
             login_user(user, remember=form.remember.data) # if the user clicked remember me 
             next_page = request.args.get('next') # variable that holds the page the user wanted to get to before they had to log on 
